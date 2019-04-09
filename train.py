@@ -58,7 +58,7 @@ def example_batch(run, inp, output_file, title=None):
     
     # save sample batch
     if run != None:
-        run.log_image('Example Batch', plot=plt)
+        run.log_image('Example_Batch', plot=plt)
     else:
         plt.savefig(str(output_file), bbox_inches='tight')
     plt.close()
@@ -98,7 +98,7 @@ def visualize_model(run, model, dataloader, class_names, device, output_file, nu
 
                     # save validation visualization
                     if run != None:
-                        run.log_image('Validation Run', plot=plt)
+                        run.log_image('Validation_Run', plot=plt)
                     else:
                         plt.savefig(str(output_file), bbox_inches='tight')
                     plt.close()

@@ -1,5 +1,7 @@
 .ipynb_checkpoints
 data/
+assets/
 outputs/
 *.onnx
 aml_config/
+*.log
