@@ -150,7 +150,6 @@ def train_model(model, device, criterion, optimizer, scheduler, dataloaders, dat
         # Each epoch has a training and validation phase
         for phase in ['train', 'val']:
             if phase == 'train':
-                scheduler.step()
                 model.train()  # Set model to training mode
             else:
                 model.eval()   # Set model to evaluate mode
@@ -204,6 +203,9 @@ def train_model(model, device, criterion, optimizer, scheduler, dataloaders, dat
             if phase == 'val' and epoch_acc > best_acc:
                 best_acc = epoch_acc
                 best_model_wts = copy.deepcopy(model.state_dict())
+            if phase == 'train':
+                scheduler.step()
+                print(f'Current lr: {scheduler.get_lr()}')
 
         print()
 
