@@ -223,7 +223,7 @@ def train_model(model, device, criterion, optimizer, scheduler, dataloaders, dat
 
     return model
 
-def start(data_dir='data', output_dir='outputs', batch_size=4, epochs=25, lr=0.001, momentum=0.9):
+def start(data_dir='data', output_dir='outputs', batch_size=4, epochs=25, lr=0.001):
     
     # check for GPU
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -241,7 +241,6 @@ def start(data_dir='data', output_dir='outputs', batch_size=4, epochs=25, lr=0.0
         run.log('epochs', epochs)
         run.log('batch', batch_size)
         run.log('learning_rate', lr)
-        run.log('momentum', momentum)
         run.log('device', device)
 
     # get data loaders
@@ -262,28 +261,35 @@ def start(data_dir='data', output_dir='outputs', batch_size=4, epochs=25, lr=0.0
 
     print('Loading pretrained resnet18')
     # load pre-trained resnet18
-    model_ft = models.resnet18(pretrained=True)
-    num_ftrs = model_ft.fc.in_features
-    model_ft.fc = nn.Linear(num_ftrs, 2)
-
-    model_ft = model_ft.to(device)
+    
+    resnet = models.resnet18(pretrained=True)
+    num_ftrs = resnet.fc.out_features
+    
+    model = nn.Sequential(
+        resnet,
+        nn.ReLU(),
+        nn.Linear(num_ftrs, len(classes)),
+        nn.Softmax()
+    )
+    
+    model = model.to(device)
 
     criterion = nn.CrossEntropyLoss()
 
     # Observe that all parameters are being optimized
-    optimizer_ft = optim.SGD(model_ft.parameters(), lr=lr, momentum=momentum)
+    optimizer_ft = optim.SGD(model.parameters(), lr=lr)
 
     # Decay LR by a factor of 0.1 every 7 epochs
     exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.1)
 
-    model_ft = train_model(model_ft, device, criterion, optimizer_ft, exp_lr_scheduler, 
+    model = train_model(model, device, criterion, optimizer_ft, exp_lr_scheduler, 
                             dataloaders, dataset_sizes, num_epochs=epochs, run=run)
 
 
     print('Visualizing validation run...')
     validation = output_dir.joinpath('{}.png'.format('validation')).resolve()
     print('Saving validation to {}'.format(str(validation)))
-    visualize_model(run, model_ft, dataloaders['val'], classes, device, validation)
+    visualize_model(run, model, dataloaders['val'], classes, device, validation)
 
     info('Saving')
     name = "model"
@@ -292,12 +298,24 @@ def start(data_dir='data', output_dir='outputs', batch_size=4, epochs=25, lr=0.0
     
     # create dummy variable to traverse graph
     x = torch.randint(255, (1, 3, 224, 224), dtype=torch.float).to(device) / 255
-    onnx.export(model_ft, x, onnx_file)
+    onnx.export(model, x, onnx_file)
     print('Saved onnx model to {}'.format(onnx_file))
 
     # saving PyTorch Model Dictionary
-    torch.save(model_ft.state_dict(), pth_file)
+    torch.save(model.state_dict(), pth_file)
     print('Saved PyTorch Model to {}'.format(pth_file))
+
+    if run != None:
+        print('Offline logging...')
+        run.upload_file("model.onnx", str(onnx_file))
+
+        run.register_model(model_name='foodai', 
+                            model_path="model.onnx", 
+                            model_framework="PyTorch", 
+                            model_framework_version=torch.__version__, 
+                            description="Tacos vs Burritos")
+
+        print('Registered model!')
 
 
 if __name__ == '__main__':
