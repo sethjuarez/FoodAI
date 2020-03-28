@@ -183,7 +183,7 @@ def train_model(model, device, criterion, optimizer, scheduler, dataloaders, dat
                 if phase == 'train':
                     if run != None:
                         run.log('{}_loss'.format(phase), loss)
-                    print('\tloss: {:>10f}  [{:>3d}/{:>3d}]'.format(loss, batch * len(inputs), dataset_sizes[phase]))
+                    print('	loss: {:>10f}  [{:>3d}/{:>3d}]'.format(loss, batch * len(inputs), dataset_sizes[phase]))
 
                 running_loss += loss * inputs.size(0)
                 running_corrects += torch.sum(preds == labels.data)
@@ -257,7 +257,7 @@ def start(data_dir='data', output_dir='outputs', batch_size=4, epochs=25, lr=0.0
     print('Classes: ', classes)
     print('Examples:')
     for k, v in dataset_sizes.items():
-        print('\t{} - {}'.format(k, v))
+        print('	{} - {}'.format(k, v))
 
     print('Loading pretrained resnet18')
     # load pre-trained resnet18

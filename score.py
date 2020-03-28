@@ -49,12 +49,11 @@ def run(raw_data):
     payload = {
         'time': str(inference_time.total_seconds()),
         'prediction': classes[int(np.argmax(pred_onnx))],
-        'scores': predictions,
-        'return': str(pred_onnx),
-        'type': str(type(pred_onnx))
+        'scores': predictions
     }
 
-    print('Input ({}),\nPrediction ({})'.format(post['image'], payload))
+    print('Input ({}),
+Prediction ({})'.format(post['image'], payload))
 
     return payload
 
@@ -63,7 +62,10 @@ if __name__ == '__main__':
     burrito = 'https://images-gmi-pmc.edge-generalmills.com/f4c0a86f-b080-45cd-a8a7-06b63cdb4671.jpg'
     tacos = 'https://leitesculinaria.com/wp-content/uploads/fly-images/96169/best-hot-dog-recipe-fi-400x225-c.jpg'
 
-    print('\n---------------------\nInference with burrito:')
+    print('
+---------------------
+Inference with burrito:')
     print(run(json.dumps({'image': burrito})))
-    print('\nInference with taco:')
+    print('
+Inference with taco:')
     print(run(json.dumps({'image': tacos})))
