@@ -9,6 +9,8 @@ import argparse
 from pathlib import Path
 import torch
 import torch.onnx as onnx
+import onnx as nx
+from onnx import optimizer
 import torch.nn as nn
 import torch.optim as optim
 from torch.optim import lr_scheduler
@@ -19,6 +21,7 @@ import matplotlib.pyplot as plt
 import time
 import os
 import copy
+
 
 from azureml.core.run import Run
 
@@ -69,7 +72,7 @@ def visualize_model(run, model, dataloader, class_names, device, output_file, nu
     images_so_far = 0
 
     rows = num_images//cols if num_images % cols == 0 else num_images//cols + 1
-    fig, axes = plt.subplots(rows, cols, figsize=(18, 7), 
+    _, axes = plt.subplots(rows, cols, figsize=(18, 7), 
                       subplot_kw={'xticks':[], 'yticks':[]},
                       gridspec_kw=dict(hspace=0.4, wspace=0.1))
     
@@ -124,6 +127,7 @@ def get_data(data_dir='data', batch_size=4):
             transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
         ]),
     }
+
 
     image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x),
                                             data_transforms[x])
@@ -205,7 +209,7 @@ def train_model(model, device, criterion, optimizer, scheduler, dataloaders, dat
                 best_model_wts = copy.deepcopy(model.state_dict())
             if phase == 'train':
                 scheduler.step()
-                print(f'Current lr: {scheduler.get_lr()}')
+                print(f'Current lr: {scheduler.get_last_lr()}')
 
         print()
 
@@ -262,14 +266,14 @@ def start(data_dir='data', output_dir='outputs', batch_size=4, epochs=25, lr=0.0
     print('Loading pretrained resnet18')
     # load pre-trained resnet18
     
-    resnet = models.resnet18(pretrained=True)
-    num_ftrs = resnet.fc.out_features
+    resnet = models.mobilenet_v2(pretrained=True)
+    #num_ftrs = resnet.
     
     model = nn.Sequential(
         resnet,
         nn.ReLU(),
-        nn.Linear(num_ftrs, len(classes)),
-        nn.Softmax()
+        nn.Linear(1000, len(classes)),
+        nn.Softmax(dim=1)
     )
     
     model = model.to(device)
@@ -299,6 +303,7 @@ def start(data_dir='data', output_dir='outputs', batch_size=4, epochs=25, lr=0.0
     # create dummy variable to traverse graph
     x = torch.randint(255, (1, 3, 224, 224), dtype=torch.float).to(device) / 255
     onnx.export(model, x, onnx_file)
+    
     print('Saved onnx model to {}'.format(onnx_file))
 
     # saving PyTorch Model Dictionary
@@ -309,7 +314,7 @@ def start(data_dir='data', output_dir='outputs', batch_size=4, epochs=25, lr=0.0
         print('Offline logging...')
         run.upload_file("model.onnx", str(onnx_file))
 
-        run.register_model(model_name='foodai', 
+        run.register_model(model_name='bork', 
                             model_path="model.onnx", 
                             model_framework="PyTorch", 
                             model_framework_version=torch.__version__, 

@@ -33,7 +33,7 @@ def main():
                              script="train.py", 
                              arguments=[
                                  "-d", "/data", 
-                                 "-e", "1"])
+                                 "-e", "10"])
     
     # running the script
     config = RunConfiguration()
@@ -43,7 +43,7 @@ def main():
     config.target = "local"
 
     script.run_config = config
-    print(script.run_config)
+    #print(script.run_config)
 
     # run experiment locally but log to AML
     #ws = Workspace(subscription_id=subscription_id, resource_group=resource_group, workspace_name=workspace_name)
