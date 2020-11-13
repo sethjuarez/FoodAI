@@ -1,7 +1,9 @@
 .ipynb_checkpoints
-data/
+data/raw/
 assets/
 outputs/
 *.onnx
 aml_config/
 *.log
+data/
+__pycache__/

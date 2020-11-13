@@ -29,8 +29,8 @@ def create_env(is_local=True):
 
 def main():
     # what to run
-    script = ScriptRunConfig(source_directory=".", 
-                             script="train.py", 
+    script = ScriptRunConfig(source_directory="../src", 
+                             script="../src/train.py", 
                              arguments=[
                                  "-d", "/data", 
                                  "-e", "10"])

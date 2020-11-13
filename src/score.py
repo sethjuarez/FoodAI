@@ -11,13 +11,15 @@ from torchvision import transforms
 # azureml imports
 from azureml.core.model import Model
 
+session, transform, classes, input_name = None, None, None, None
+
 def init():
     global session, transform, classes, input_name
 
     try:
         model_path = Model.get_model_path('foodai')
     except:
-        model_path = 'model.onnx'
+        model_path = '../outputs/model.onnx'
 
     classes = ['burrito', 'tacos']
     session = rt.InferenceSession(model_path) 
@@ -52,8 +54,7 @@ def run(raw_data):
         'scores': predictions
     }
 
-    print('Input ({}),
-Prediction ({})'.format(post['image'], payload))
+    print('Input ({}), Prediction ({})'.format(post['image'], payload))
 
     return payload
 
@@ -62,10 +63,7 @@ if __name__ == '__main__':
     burrito = 'https://images-gmi-pmc.edge-generalmills.com/f4c0a86f-b080-45cd-a8a7-06b63cdb4671.jpg'
     tacos = 'https://leitesculinaria.com/wp-content/uploads/fly-images/96169/best-hot-dog-recipe-fi-400x225-c.jpg'
 
-    print('
----------------------
-Inference with burrito:')
+    print('---------------------Inference with burrito:')
     print(run(json.dumps({'image': burrito})))
-    print('
-Inference with taco:')
+    print('Inference with taco:')
     print(run(json.dumps({'image': tacos})))
