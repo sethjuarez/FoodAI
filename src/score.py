@@ -13,6 +13,7 @@ from azureml.core.model import Model
 
 session, transform, classes, input_name = None, None, None, None
 
+
 def init():
     global session, transform, classes, input_name
 
@@ -22,14 +23,15 @@ def init():
         model_path = '../outputs/model.onnx'
 
     classes = ['burrito', 'tacos']
-    session = rt.InferenceSession(model_path) 
+    session = rt.InferenceSession(model_path)
     input_name = session.get_inputs()[0].name
     transform = transforms.Compose([
-            transforms.Resize(256),
-            transforms.CenterCrop(224),
-            transforms.ToTensor(),
-            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-        ])
+        transforms.Resize(256),
+        transforms.CenterCrop(224),
+        transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    ])
+
 
 def run(raw_data):
     prev_time = time.time()
@@ -58,10 +60,11 @@ def run(raw_data):
 
     return payload
 
+
 if __name__ == '__main__':
     init()
-    burrito = 'https://images-gmi-pmc.edge-generalmills.com/f4c0a86f-b080-45cd-a8a7-06b63cdb4671.jpg'
-    tacos = 'https://leitesculinaria.com/wp-content/uploads/fly-images/96169/best-hot-dog-recipe-fi-400x225-c.jpg'
+    burrito = 'https://www.exploreveg.org/files/2015/05/sofritas-burrito.jpeg'
+    tacos = 'https://upload.wikimedia.org/wikipedia/commons/2/27/Mmm..._Tacos.jpg'
 
     print('---------------------Inference with burrito:')
     print(run(json.dumps({'image': burrito})))
