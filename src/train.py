@@ -87,7 +87,8 @@ def save(model: nn.Module, path: str, name: str, device: str='cpu') -> str:
 # Main Training Loop                                              #
 ###################################################################
 @main_logger
-def main(data_dir='data', output_dir='outputs', batch_size=4, epochs=25, lr=0.001, device:str='CPU'):
+def main(data_dir='data', output_dir='outputs', batch_size=4, epochs=25, lr=0.001, 
+         device:str='CPU', name='foodai', description='none'):
     """
     Main training code
     """
@@ -119,7 +120,7 @@ def main(data_dir='data', output_dir='outputs', batch_size=4, epochs=25, lr=0.00
     # build model
     print(f'Building Model (transfer learning using mobilenet_v2)')
     model = nn.Sequential(
-        models.mobilenet_v2(pretrained=True),
+        models.resnet50(pretrained=True),
         nn.ReLU(),
         nn.Linear(1000, 256),
         nn.ReLU(),
@@ -158,8 +159,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Hot Dog vs Pizza')
     parser.add_argument('-d', '--data', help='directory to training and test data', default='../data')
     parser.add_argument('-o', '--output', help='output directory', default='../outputs')
+    parser.add_argument('-n', '--name', help='experiment/model name', default='foodai')
+    parser.add_argument('-c', '--description', help='model description', default='')
     
-    parser.add_argument('-e', '--epochs', help='number of epochs', default=15, type=int)
+    parser.add_argument('-e', '--epochs', help='number of epochs', default=1, type=int)
     parser.add_argument('-b', '--batch', help='batch size', default=4, type=int)
     parser.add_argument('-l', '--lr', help='learning rate', default=0.001, type=float)
 
@@ -171,4 +174,6 @@ if __name__ == '__main__':
     args.outputs = check_dir(args.output).resolve()
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    main(data_dir=args.data, output_dir=args.outputs, batch_size=args.batch, epochs=args.epochs, lr=args.lr, device=device)
+    main(data_dir=args.data, output_dir=args.outputs, 
+         batch_size=args.batch, epochs=args.epochs, lr=args.lr, 
+         device=device, name=args.name, description=args.description)

@@ -7,3 +7,6 @@ aml_config/
 *.log
 data/
 __pycache__/
+.vscode/
+*logs/
+aml/

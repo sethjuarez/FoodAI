@@ -3,12 +3,12 @@ import torch
 from torch import nn
 from pathlib import Path
 from functools import wraps
-from azureml.core.run import Run
+#from azureml.core.run import Run
 from torch import optim
 from torch.utils.data import dataloader
 from torch.optim.optimizer import Optimizer
 
-run: Run = None
+run = None
 
 ###################################################################
 # Helpers                                                         #
@@ -64,13 +64,13 @@ def main_logger(f):
         global run
         info('Setup')
         # AML Logging (if available)
-        run = Run.get_context()
-        if 'offlinerun' in run.id.lower():
-            print('Offline logging...')
-            run = None
-        else:
-            print('Using AML Logging...')
-
+        #run = Run.get_context()
+        #if 'offlinerun' in run.id.lower():
+        #    print('Offline logging...')
+        #    run = None
+        #else:
+        #    print('Using AML Logging...')
+        run = None
         output_path: Path = None
         for k, v in kwargs.items():
             print(f'{k.rjust(10)} => {v}')
@@ -80,16 +80,20 @@ def main_logger(f):
                 run.log(k, v)
         # run 
         f(*args, **kwargs)
+        name = kwargs['name']
+        desc = kwargs['description']
         if run != None:
             info('Registering Model')
             onnx_file = output_path.joinpath('model.onnx').resolve()
             run.upload_file('model.onnx', str(onnx_file))
             
-            run.register_model(model_name='foodai', 
+            
+            run.register_model(model_name=name, 
                                 model_path="model.onnx", 
                                 model_framework="PyTorch", 
                                 model_framework_version=torch.__version__, 
-                                description="Tacos vs Burritos")
+                                description=desc,
+                                tags=run.tags)
 
             print('Registration Complete!')
 
